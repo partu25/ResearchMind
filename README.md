@@ -4,6 +4,15 @@
 
 Four specialized AI agents collaborate sequentially — searching the live web, scraping deep webpage content, drafting a comprehensive report, and critiquing the output — to deliver detailed research documents on any topic.
 
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://researchmind-bdwjxbdkhf7xr38wbz9ngd.streamlit.app)
+
+---
+
+## 🌐 Live Demo
+
+Try the live deployed web application here:  
+👉 **[https://researchmind-bdwjxbdkhf7xr38wbz9ngd.streamlit.app](https://researchmind-bdwjxbdkhf7xr38wbz9ngd.streamlit.app)**
+
 ---
 
 ## 🌟 Key Features
@@ -85,11 +94,19 @@ TAVILY_API_KEY=tvly-your_tavily_api_key_here
 
 ---
 
-## 💻 Running the Application
+## ☁️ Deployment
+
+This project is deployed on **Streamlit Community Cloud**:
+- **Live URL:** [https://researchmind-bdwjxbdkhf7xr38wbz9ngd.streamlit.app](https://researchmind-bdwjxbdkhf7xr38wbz9ngd.streamlit.app)
+- **Automated CI/CD:** Every commit pushed to `main` branch automatically updates the live app.
+
+---
+
+## 💻 Running Locally
 
 ### Option A: Interactive Web UI (Streamlit)
 
-Launch the Streamlit app:
+Launch the Streamlit app locally:
 
 ```bash
 uv run streamlit run app.py
@@ -113,7 +130,7 @@ python pipeline.py
 - **LLM Provider:** [NVIDIA AI Endpoints](https://build.nvidia.com/) (`nvidia/nemotron-mini-4b-instruct`)
 - **Search Tool:** [Tavily Search API](https://tavily.com/)
 - **Scraper:** BeautifulSoup4 & Requests
-- **UI Framework:** Streamlit (Custom CSS Glassmorphic Styling)
+- **UI & Hosting:** Streamlit & Streamlit Community Cloud
 
 ---
 
