@@ -435,6 +435,9 @@ if run_btn:
         st.session_state.results = {}
         st.session_state.running = True
         st.session_state.done = False
+        for k in ("raw_search", "raw_reader"):
+            if k in st.session_state:
+                del st.session_state[k]
         st.rerun()
 
 if st.session_state.running and not st.session_state.done:
@@ -503,11 +506,11 @@ if r:
     # Raw outputs in expanders
     if "search" in r:
         with st.expander("🔍 Search Results (raw)", expanded=False):
-            st.text_area("Search Agent Output", value=r["search"], height=250, disabled=True, key="raw_search")
+            st.text_area("Search Agent Output", value=r["search"], height=250, disabled=True)
 
     if "reader" in r:
         with st.expander("📄 Scraped Content (raw)", expanded=False):
-            st.text_area("Reader Agent Output", value=r["reader"], height=250, disabled=True, key="raw_reader")
+            st.text_area("Reader Agent Output", value=r["reader"], height=250, disabled=True)
 
     # Final report
     if "writer" in r:
