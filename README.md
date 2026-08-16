@@ -1,6 +1,6 @@
 # 🔬 ResearchMind · Multi-Agent AI Research System
 
-**ResearchMind** is an advanced, autonomous multi-agent research pipeline powered by **LangChain**, **NVIDIA AI Endpoints (Nemotron)**, **Tavily Web Search**, and **Streamlit**. 
+**ResearchMind** is an advanced, autonomous multi-agent research pipeline powered by **LangChain**, **Mistral AI**, **Tavily Web Search**, and **Streamlit**. 
 
 Four specialized AI agents collaborate sequentially — searching the live web, scraping deep webpage content, drafting a comprehensive report, and critiquing the output — to deliver detailed research documents on any topic.
 
@@ -38,7 +38,7 @@ graph TD
     SearchResults --> ReaderAgent[02. Reader Agent]
     ReaderAgent -- BeautifulSoup Scraper --> ScrapedContent[Deep Web Content]
     SearchResults & ScrapedContent --> WriterChain[03. Writer Chain]
-    WriterChain -- Nemotron LLM --> ResearchReport[Structured Report]
+    WriterChain -- Mistral AI LLM --> ResearchReport[Structured Report]
     ResearchReport --> CriticChain[04. Critic Chain]
     CriticChain -- Evaluation --> FinalOutput[Final Report + Peer Review & Download]
 ```
@@ -84,12 +84,12 @@ uv pip install -r requirements.txt
 Create a `.env` file in the root directory and add your API keys:
 
 ```env
-NVIDIA_API_KEY=nvapi-your_nvidia_api_key_here
+MISTRAL_API_KEY=your_mistral_api_key_here
 TAVILY_API_KEY=tvly-your_tavily_api_key_here
 ```
 
 > 🔑 **Get your free keys:**
-> - [NVIDIA AI Endpoints Key](https://build.nvidia.com/) (Nemotron model)
+> - [Mistral AI Key](https://console.mistral.ai/) (`mistral-small-latest`)
 > - [Tavily Search API Key](https://tavily.com/)
 
 ---
@@ -127,7 +127,7 @@ python pipeline.py
 ## ⚙️ Tech Stack
 
 - **Framework:** [LangChain](https://www.langchain.com/) / LangChain Core
-- **LLM Provider:** [NVIDIA AI Endpoints](https://build.nvidia.com/) (`nvidia/nemotron-mini-4b-instruct`)
+- **LLM Provider:** [Mistral AI](https://console.mistral.ai/) (`mistral-small-latest`)
 - **Search Tool:** [Tavily Search API](https://tavily.com/)
 - **Scraper:** BeautifulSoup4 & Requests
 - **UI & Hosting:** Streamlit & Streamlit Community Cloud
