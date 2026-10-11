@@ -7,13 +7,24 @@ from dotenv import load_dotenv
 from rich import print
 load_dotenv()
 
-tavily = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
+def _get_api_key(name: str):
+    val = os.getenv(name)
+    if val:
+        return val
+    try:
+        import streamlit as st
+        if hasattr(st, "secrets") and name in st.secrets:
+            return str(st.secrets[name])
+    except Exception:
+        pass
+    return None
+
+tavily = TavilyClient(api_key=_get_api_key("TAVILY_API_KEY") or "")
 
 @tool
 def web_search(query : str) -> str:
     """Search the web for recent and reliable information on a topic . Returns Titles , URLs and snippets."""
     results = tavily.search(query=query,max_results=5)
-
     out = []
 
     for r in results['results']:

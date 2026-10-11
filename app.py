@@ -1,4 +1,15 @@
+import os
 import streamlit as st
+
+# Ensure Streamlit secrets are synced to os.environ for all libraries
+try:
+    if hasattr(st, "secrets"):
+        for k, v in st.secrets.items():
+            if isinstance(v, str) and k not in os.environ:
+                os.environ[k] = v
+except Exception:
+    pass
+
 import time
 from agents import build_reader_agent, build_search_agent, writer_chain, critic_chain
 
@@ -428,8 +439,15 @@ with col_pipeline:
 
 
 # ── Run pipeline ──────────────────────────────────────────────────────────────
+# ── Run pipeline ──────────────────────────────────────────────────────────────
 if run_btn:
-    if not topic.strip():
+    mistral_k = os.getenv("MISTRAL_API_KEY")
+    tavily_k = os.getenv("TAVILY_API_KEY")
+    if not mistral_k:
+        st.error("⚠️ **MISTRAL_API_KEY** is not set! Please add it to your Streamlit Cloud Secrets (Settings ⚙️ ➔ Secrets) or your local `.env` file.")
+    elif not tavily_k:
+        st.error("⚠️ **TAVILY_API_KEY** is not set! Please add it to your Streamlit Cloud Secrets (Settings ⚙️ ➔ Secrets) or your local `.env` file.")
+    elif not topic.strip():
         st.warning("Please enter a research topic first.")
     else:
         st.session_state.results = {}
@@ -444,56 +462,72 @@ if st.session_state.running and not st.session_state.done:
     results = st.session_state.results
     topic_val = st.session_state.topic_input
 
-    # ── Step 1: Search (runs first, then reruns page to show ✓ Done) ──
-    if "search" not in results:
-        with st.spinner("🔍  Search Agent is working…"):
-            search_agent = build_search_agent()
-            sr = search_agent.invoke({
-                "messages": [("user", f"Find recent, reliable and detailed information about: {topic_val}")]
-            })
-            results["search"] = sr["messages"][-1].content
-            st.session_state.results = dict(results)
-        st.rerun()  # refresh → shows Step 1 as Done, starts Step 2
+    try:
+        # ── Step 1: Search (runs first, then reruns page to show ✓ Done) ──
+        if "search" not in results:
+            with st.spinner("🔍  Search Agent is working…"):
+                search_agent = build_search_agent()
+                sr = search_agent.invoke({
+                    "messages": [("user", f"Find recent, reliable and detailed information about: {topic_val}")]
+                })
+                results["search"] = sr["messages"][-1].content
+                st.session_state.results = dict(results)
+            st.rerun()  # refresh → shows Step 1 as Done, starts Step 2
 
-    # ── Step 2: Reader ──
-    elif "reader" not in results:
-        with st.spinner("📄  Reader Agent is scraping top resources…"):
-            reader_agent = build_reader_agent()
-            rr = reader_agent.invoke({
-                "messages": [("user",
-                    f"Based on the following search results about '{topic_val}', "
-                    f"pick the most relevant URL and scrape it for deeper content.\n\n"
-                    f"Search Results:\n{results['search'][:800]}"
-                )]
-            })
-            results["reader"] = rr["messages"][-1].content
-            st.session_state.results = dict(results)
-        st.rerun()  # refresh → shows Step 2 as Done, starts Step 3
+        # ── Step 2: Reader ──
+        elif "reader" not in results:
+            with st.spinner("📄  Reader Agent is scraping top resources…"):
+                reader_agent = build_reader_agent()
+                rr = reader_agent.invoke({
+                    "messages": [("user",
+                        f"Based on the following search results about '{topic_val}', "
+                        f"pick the most relevant URL and scrape it for deeper content.\n\n"
+                        f"Search Results:\n{results['search'][:800]}"
+                    )]
+                })
+                results["reader"] = rr["messages"][-1].content
+                st.session_state.results = dict(results)
+            st.rerun()  # refresh → shows Step 2 as Done, starts Step 3
 
-    # ── Step 3: Writer ──
-    elif "writer" not in results:
-        with st.spinner("✍️  Writer is drafting the report…"):
-            research_combined = (
-                f"SEARCH RESULTS:\n{results['search']}\n\n"
-                f"DETAILED SCRAPED CONTENT:\n{results['reader']}"
-            )
-            results["writer"] = writer_chain.invoke({
-                "topic": topic_val,
-                "research": research_combined
-            })
-            st.session_state.results = dict(results)
-        st.rerun()  # refresh → shows Step 3 as Done, starts Step 4
+        # ── Step 3: Writer ──
+        elif "writer" not in results:
+            with st.spinner("✍️  Writer is drafting the report…"):
+                research_combined = (
+                    f"SEARCH RESULTS:\n{results['search']}\n\n"
+                    f"DETAILED SCRAPED CONTENT:\n{results['reader']}"
+                )
+                results["writer"] = writer_chain.invoke({
+                    "topic": topic_val,
+                    "research": research_combined
+                })
+                st.session_state.results = dict(results)
+            st.rerun()  # refresh → shows Step 3 as Done, starts Step 4
 
-    # ── Step 4: Critic ──
-    elif "critic" not in results:
-        with st.spinner("🧐  Critic is reviewing the report…"):
-            results["critic"] = critic_chain.invoke({
-                "report": results["writer"]
-            })
-            st.session_state.results = dict(results)
+        # ── Step 4: Critic ──
+        elif "critic" not in results:
+            with st.spinner("🧐  Critic is reviewing the report…"):
+                results["critic"] = critic_chain.invoke({
+                    "report": results["writer"]
+                })
+                st.session_state.results = dict(results)
+            st.session_state.running = False
+            st.session_state.done = True
+            st.rerun()  # refresh → shows all 4 steps Done + final results
+
+    except Exception as e:
         st.session_state.running = False
-        st.session_state.done = True
-        st.rerun()  # refresh → shows all 4 steps Done + final results
+        st.session_state.done = False
+        err_str = str(e)
+        if hasattr(e, "response") and getattr(e, "response", None) is not None:
+            try:
+                err_str += f"\n\nServer Response: {e.response.text}"
+            except Exception:
+                pass
+        st.error(f"❌ Error during research pipeline: {err_str}")
+        if "401" in err_str or "unauthorized" in err_str.lower():
+            st.info("🔑 **Authentication Error (401)**: Please check that your `MISTRAL_API_KEY` in Streamlit Cloud Secrets is valid and has no extra spaces or quotes.")
+        elif "429" in err_str or "rate" in err_str.lower():
+            st.info("⏳ **Rate Limit / Quota Error (429)**: Mistral API rate limit reached or free credits exhausted. Please wait 1-2 minutes or check your account at [console.mistral.ai](https://console.mistral.ai).")
 
 
 # ── Results display ───────────────────────────────────────────────────────────

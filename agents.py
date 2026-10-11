@@ -8,10 +8,22 @@ import os
 
 load_dotenv()
 
+def _get_api_key(name: str):
+    val = os.getenv(name)
+    if val:
+        return val
+    try:
+        import streamlit as st
+        if hasattr(st, "secrets") and name in st.secrets:
+            return str(st.secrets[name])
+    except Exception:
+        pass
+    return None
+
 # model setup 
 llm = ChatMistralAI(
     model="mistral-small-latest",
-    api_key=os.getenv("MISTRAL_API_KEY"),
+    api_key=_get_api_key("MISTRAL_API_KEY"),
     max_retries=5
 )
 
