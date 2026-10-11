@@ -22,7 +22,7 @@ def _get_api_key(name: str):
 
 # model setup 
 llm = ChatGroq(
-    model="llama-3.1-8b-instant",
+    model="openai/gpt-oss-20b",
     api_key=_get_api_key("GROQ_API_KEY"),
     temperature=0.2,
     max_retries=5
