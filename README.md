@@ -89,7 +89,7 @@ TAVILY_API_KEY=tvly-your_tavily_api_key_here
 ```
 
 > 🔑 **Get your free keys:**
-> - [Groq API Key](https://console.groq.com/) (`llama-3.3-70b-versatile`)
+> - [Groq API Key](https://console.groq.com/) (`llama-3.1-8b-instant`)
 > - [Tavily Search API Key](https://tavily.com/)
 
 ---
@@ -127,7 +127,7 @@ python pipeline.py
 ## ⚙️ Tech Stack
 
 - **Framework:** [LangChain](https://www.langchain.com/) / LangChain Core
-- **LLM Provider:** [Groq](https://console.groq.com/) (`llama-3.3-70b-versatile`)
+- **LLM Provider:** [Groq](https://console.groq.com/) (`llama-3.1-8b-instant`)
 - **Search Tool:** [Tavily Search API](https://tavily.com/)
 - **Scraper:** BeautifulSoup4 & Requests
 - **UI & Hosting:** Streamlit & Streamlit Community Cloud
