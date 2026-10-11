@@ -1,6 +1,6 @@
 # 🔬 ResearchMind · Multi-Agent AI Research System
 
-**ResearchMind** is an advanced, autonomous multi-agent research pipeline powered by **LangChain**, **Mistral AI**, **Tavily Web Search**, and **Streamlit**. 
+**ResearchMind** is an advanced, autonomous multi-agent research pipeline powered by **LangChain**, **Groq (Llama 3.3 70B)**, **Tavily Web Search**, and **Streamlit**. 
 
 Four specialized AI agents collaborate sequentially — searching the live web, scraping deep webpage content, drafting a comprehensive report, and critiquing the output — to deliver detailed research documents on any topic.
 
@@ -38,7 +38,7 @@ graph TD
     SearchResults --> ReaderAgent[02. Reader Agent]
     ReaderAgent -- BeautifulSoup Scraper --> ScrapedContent[Deep Web Content]
     SearchResults & ScrapedContent --> WriterChain[03. Writer Chain]
-    WriterChain -- Mistral AI LLM --> ResearchReport[Structured Report]
+    WriterChain -- Groq Llama 3.3 70B --> ResearchReport[Structured Report]
     ResearchReport --> CriticChain[04. Critic Chain]
     CriticChain -- Evaluation --> FinalOutput[Final Report + Peer Review & Download]
 ```
@@ -84,12 +84,12 @@ uv pip install -r requirements.txt
 Create a `.env` file in the root directory and add your API keys:
 
 ```env
-MISTRAL_API_KEY=your_mistral_api_key_here
+GROQ_API_KEY=gsk_your_groq_api_key_here
 TAVILY_API_KEY=tvly-your_tavily_api_key_here
 ```
 
 > 🔑 **Get your free keys:**
-> - [Mistral AI Key](https://console.mistral.ai/) (`mistral-small-latest`)
+> - [Groq API Key](https://console.groq.com/) (`llama-3.3-70b-versatile`)
 > - [Tavily Search API Key](https://tavily.com/)
 
 ---
@@ -127,7 +127,7 @@ python pipeline.py
 ## ⚙️ Tech Stack
 
 - **Framework:** [LangChain](https://www.langchain.com/) / LangChain Core
-- **LLM Provider:** [Mistral AI](https://console.mistral.ai/) (`mistral-small-latest`)
+- **LLM Provider:** [Groq](https://console.groq.com/) (`llama-3.3-70b-versatile`)
 - **Search Tool:** [Tavily Search API](https://tavily.com/)
 - **Scraper:** BeautifulSoup4 & Requests
 - **UI & Hosting:** Streamlit & Streamlit Community Cloud

@@ -439,12 +439,11 @@ with col_pipeline:
 
 
 # ── Run pipeline ──────────────────────────────────────────────────────────────
-# ── Run pipeline ──────────────────────────────────────────────────────────────
 if run_btn:
-    mistral_k = os.getenv("MISTRAL_API_KEY")
+    groq_k = os.getenv("GROQ_API_KEY")
     tavily_k = os.getenv("TAVILY_API_KEY")
-    if not mistral_k:
-        st.error("⚠️ **MISTRAL_API_KEY** is not set! Please add it to your Streamlit Cloud Secrets (Settings ⚙️ ➔ Secrets) or your local `.env` file.")
+    if not groq_k:
+        st.error("⚠️ **GROQ_API_KEY** is not set! Please add it to your Streamlit Cloud Secrets (Settings ⚙️ ➔ Secrets) or your local `.env` file.")
     elif not tavily_k:
         st.error("⚠️ **TAVILY_API_KEY** is not set! Please add it to your Streamlit Cloud Secrets (Settings ⚙️ ➔ Secrets) or your local `.env` file.")
     elif not topic.strip():
@@ -525,9 +524,9 @@ if st.session_state.running and not st.session_state.done:
                 pass
         st.error(f"❌ Error during research pipeline: {err_str}")
         if "401" in err_str or "unauthorized" in err_str.lower():
-            st.info("🔑 **Authentication Error (401)**: Please check that your `MISTRAL_API_KEY` in Streamlit Cloud Secrets is valid and has no extra spaces or quotes.")
+            st.info("🔑 **Authentication Error (401)**: Please check that your `GROQ_API_KEY` in Streamlit Cloud Secrets is valid and has no extra spaces or quotes.")
         elif "429" in err_str or "rate" in err_str.lower():
-            st.info("⏳ **Rate Limit / Quota Error (429)**: Mistral API rate limit reached or free credits exhausted. Please wait 1-2 minutes or check your account at [console.mistral.ai](https://console.mistral.ai).")
+            st.info("⏳ **Rate Limit / Quota Error (429)**: Groq API rate limit reached. Please wait 1-2 minutes or check your account at [console.groq.com](https://console.groq.com).")
 
 
 # ── Results display ───────────────────────────────────────────────────────────
