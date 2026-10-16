@@ -26,21 +26,12 @@ def run_research_pipeline(topic : str) -> dict:
     reader_result = reader_agent.invoke({
         "messages": [("user",
             f"Based on the following search results about '{topic}', "
-            f"pick the most relevant URL and invoke scrape_url to extract its content.\n\n"
-            f"Search Results:\n{state['search_results'][:2500]}"
+            f"pick the most relevant URL and scrape it for deeper content.\n\n"
+            f"Search Results:\n{state['search_results'][:800]}"
         )]
     })
 
-    tool_msgs = [m.content for m in reader_result.get("messages", []) if m.__class__.__name__ == "ToolMessage" and m.content]
-    if tool_msgs and not all("Could not scrape" in msg for msg in tool_msgs):
-        state['scraped_content'] = "\n\n---\n\n".join(tool_msgs)
-    elif reader_result.get("messages", [])[-1].content.strip():
-        state['scraped_content'] = reader_result['messages'][-1].content
-    else:
-        import re
-        from tools import scrape_url
-        urls = re.findall(r'https?://[^\s\n"\'<>]+', state['search_results'])
-        state['scraped_content'] = scrape_url.invoke(urls[0]) if urls else "No scraped content extracted."
+    state['scraped_content'] = reader_result['messages'][-1].content
 
     print("\nscraped content: \n", state['scraped_content'])
 

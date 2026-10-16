@@ -469,19 +469,7 @@ if st.session_state.running and not st.session_state.done:
                 sr = search_agent.invoke({
                     "messages": [("user", f"Find recent, reliable and detailed information about: {topic_val}")]
                 })
-                # Capture both raw tool outputs (with all URLs) and the final AI summary:
-                search_tool_msgs = [
-                    m.content for m in sr.get("messages", [])
-                    if m.__class__.__name__ == "ToolMessage" and m.content
-                ]
-                final_search_ai = sr.get("messages", [])[-1].content if sr.get("messages") else ""
-                
-                if search_tool_msgs:
-                    results["search_tool_text"] = "\n\n".join(search_tool_msgs)
-                    results["search"] = final_search_ai if final_search_ai.strip() else "\n\n".join(search_tool_msgs)
-                else:
-                    results["search"] = final_search_ai
-                    
+                results["search"] = sr["messages"][-1].content
                 st.session_state.results = dict(results)
             st.rerun()  # refresh → shows Step 1 as Done, starts Step 2
 
@@ -489,39 +477,14 @@ if st.session_state.running and not st.session_state.done:
         elif "reader" not in results:
             with st.spinner("📄  Reader Agent is scraping top resources…"):
                 reader_agent = build_reader_agent()
-                
-                # Provide search results that explicitly include the URLs found:
-                search_context = results.get("search_tool_text") or results.get("search", "")
-                
                 rr = reader_agent.invoke({
                     "messages": [("user",
                         f"Based on the following search results about '{topic_val}', "
-                        f"pick the most relevant URL and invoke the scrape_url tool to extract its full text content.\n\n"
-                        f"Search Results:\n{search_context[:3000]}"
+                        f"pick the most relevant URL and scrape it for deeper content.\n\n"
+                        f"Search Results:\n{results['search'][:800]}"
                     )]
                 })
-                
-                # Extract the actual scraped content from ToolMessages:
-                scraped_tool_msgs = [
-                    m.content for m in rr.get("messages", [])
-                    if m.__class__.__name__ == "ToolMessage" and m.content and m.content.strip()
-                ]
-                final_reader_ai = rr.get("messages", [])[-1].content if rr.get("messages") else ""
-                
-                if scraped_tool_msgs and not all("Could not scrape" in msg for msg in scraped_tool_msgs):
-                    results["reader"] = "\n\n---\n\n".join(scraped_tool_msgs)
-                elif final_reader_ai.strip():
-                    results["reader"] = final_reader_ai
-                else:
-                    # Fallback: extract the top URL directly and scrape it
-                    import re
-                    from tools import scrape_url
-                    urls = re.findall(r'https?://[^\s\n"\'<>]+', search_context)
-                    if urls:
-                        results["reader"] = scrape_url.invoke(urls[0])
-                    else:
-                        results["reader"] = "No scraped content extracted."
-                        
+                results["reader"] = rr["messages"][-1].content
                 st.session_state.results = dict(results)
             st.rerun()  # refresh → shows Step 2 as Done, starts Step 3
 

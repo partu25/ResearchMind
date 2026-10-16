@@ -32,16 +32,14 @@ llm = ChatGroq(
 def build_search_agent():
     return create_agent(
         model=llm,
-        tools=[web_search],
-        system_prompt="You are a search research agent. Use the web_search tool to find accurate, recent information and return the URLs and findings."
+        tools=[web_search]
     )
 
 # 2nd agent 
 def build_reader_agent():
     return create_agent(
         model=llm,
-        tools=[scrape_url],
-        system_prompt="You are a reader research agent. Review the provided search results, select the best URL, and invoke the scrape_url tool to extract full article text."
+        tools=[scrape_url]
     )
 
 # writer chain 
