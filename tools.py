@@ -38,11 +38,20 @@ def web_search(query : str) -> str:
 def scrape_url(url: str) -> str:
     """Scrape and return clean text content from a given URL for deeper reading."""
     try:
-        resp = requests.get(url, timeout=8, headers={"User-Agent": "Mozilla/5.0"})
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+        }
+        resp = requests.get(url, timeout=12, headers=headers, allow_redirects=True)
+        resp.raise_for_status()
         soup = BeautifulSoup(resp.text, "html.parser")
-        for tag in soup(["script", "style", "nav", "footer"]):
+        for tag in soup(["script", "style", "nav", "footer", "header", "noscript", "svg"]):
             tag.decompose()
-        return soup.get_text(separator=" ", strip=True)[:3000]
+        text = soup.get_text(separator=" ", strip=True)
+        if not text:
+            return f"Scraped {url}: No readable text content found."
+        return f"Source: {url}\n\n{text[:3500]}"
     except Exception as e:
-        return f"Could not scrape URL: {str(e)}"
+        return f"Could not scrape {url}: {str(e)}"
 
